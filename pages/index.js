@@ -1,118 +1,280 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import React, { useState, useRef, useEffect } from 'react';
+import Navbar from './components/Navbar';
+import ExpandedCard from './components/ExpandedCard';
+import { RingLoader } from 'react-spinners';
 
-const inter = Inter({ subsets: ['latin'] })
 
-export default function Home() {
+const Home = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchBarMargin, setSearchBarMargin] = useState('5px');
+  const [searchClicked, setSearchClicked] = useState(false);
+  const [expandedCard, setExpandedCard] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const navbarRef = useRef(null);
+
+  useEffect(() => {
+    if (navbarRef.current) {
+      const navbarHeight = navbarRef.current.offsetHeight;
+      setSearchBarMargin(searchClicked ? `${navbarHeight + 5}px` : `${navbarHeight + 10}px`);
+    }
+  }, [searchQuery, searchClicked, navbarRef.current]);  
+  
+  const [backgroundIndex, setBackgroundIndex] = useState(0);
+  const images = [
+    "https://cdn.pixabay.com/photo/2014/10/28/19/26/matterhorn-507014_1280.jpg",
+    "https://images.unsplash.com/photo-1554176259-aa961fc32671?q=80&w=2018&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://cdn.pixabay.com/photo/2023/01/05/22/10/mountains-7699910_1280.jpg",
+    "https://cdn.pixabay.com/photo/2018/03/02/19/21/nature-3194001_1280.jpg"
+  ];
+  
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setBackgroundIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 5000); 
+
+    return () => clearInterval(intervalId); 
+  }, []); 
+
+  const backgroundStyle = {
+    backgroundImage: `url("${images[backgroundIndex]}")`,
+    backgroundSize: 'cover',
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: 'white',
+    textAlign: 'center',
+    position: 'relative',
+  };
+
+  const searchBarStyle = {
+    backgroundColor: 'rgba(217, 217, 217, 0.115)',
+    boxShadow: 'inset 4px -4px 4px rgba(182, 182, 182, 0.43), inset -4px 4px 4px rgba(255, 255, 255, 0.43)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '8px',
+    width: '60%',
+    padding: '8px',
+    marginTop: searchClicked ? 'auto' : searchBarMargin,
+    display: 'flex',
+    alignItems: 'center',
+  };
+
+  const iconStyle = {
+    width: '20px',
+    height: '20px',
+  };
+
+  const goButtonStyle = {
+    marginLeft: '25px',
+    color: 'white',
+    backgroundColor: 'rgba(217, 217, 217, 0.115)',
+    padding: '8px 20px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+  };
+
+  const trendingButtonStyle = {
+    marginTop: '15px',
+    backgroundColor: 'rgba(217, 217, 217, 0.115)',
+    boxShadow: 'inset 4px -4px 4px rgba(182, 182, 182, 0.43), inset -4px 4px 4px rgba(255, 255, 255, 0.43)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '12px',
+    padding: '10px',
+    color: 'white',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  };
+
+  const textAboveSearchBarStyle = {
+    marginBottom: '4px',
+    opacity: searchClicked || searchQuery !== '' ? 0 : 1,
+    transition: 'opacity 0.3s ease',
+  };
+
+  const textBelowSearchBarStyle = {
+    marginTop: '4px',
+    opacity: searchClicked || searchQuery !== '' ? 0 : 1,
+    transition: 'opacity 0.3s ease',
+  };
+
+  const searchResultsContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: searchClicked ? 'auto' : searchBarMargin,
+    height: searchResults.length > 0 ? '70%' : '0',
+    overflow: 'hidden',
+    transition: 'height 0.3s ease',
+    backgroundColor: 'white',
+    width: '100%',
+  };
+
+  const gridContainerStyle = {
+    display: 'grid',
+    gap: '10%',
+    marginTop: '16px',
+    maxHeight: '100%',
+    overflowX: 'auto',
+    whiteSpace: 'nowrap',
+    gridTemplateColumns: 'repeat(3, minmax(250px, 1fr))',
+  };
+  
+  const cardStyle = {
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    height: '100%',
+    cursor: 'pointer',
+    width: '100%',
+  };
+  
+  const imageStyle = {
+    width: '100%',
+    height: '60%', 
+    objectFit: 'cover',
+  };
+
+  const contentStyle = {
+    padding: '16px',
+    height: '40%', // Adjust the height as needed
+  };
+
+  const tagStyle = {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    color: 'black',
+  };
+
+  const tagItemStyle = {
+    backgroundColor: 'rgba(217, 217, 217, 0.5)',
+    borderRadius: '8px',
+    padding: '4px 8px',
+    margin: '4px',
+    fontSize: '12px',
+    color: 'black'
+  };
+
+  const tagCardStyle = {
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    height: '100%', 
+  };
+
+  const tagContentStyle = {
+    padding: '16px',
+    height: '100%', // Adjust the height as needed
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+
+      setTimeout(async () => {
+        const apiKey = '26398466-4842e76a74f45b571283d3bad';
+        const response = await fetch(
+          `https://pixabay.com/api/?key=${apiKey}&q=${searchQuery}&image_type=photo&per_page=9`
+        );
+        const data = await response.json();
+
+        if (navbarRef.current) {
+          setSearchBarMargin(`${navbarRef.current.offsetHeight + 5}px`);
+        }
+
+        setSearchResults(data.hits);
+        setSearchClicked(true);
+        setTimeout(() => {
+          setLoading(false);
+        }, 2000);
+      }, 2000);
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleCardClick = (result) => {
+    setExpandedCard(result);
+  };
+
+  const handleCloseExpandedCard = () => {
+    setExpandedCard(null);
+  };
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      <Navbar ref={navbarRef} />
+      <div style={backgroundStyle}>
+        <h1 className="text-4xl font-bold mb-4" style={textAboveSearchBarStyle}>
+          Discover over 2,000,000 <br /> free Stock Images
+        </h1>
+        <div style={searchBarStyle}>
+          <span className="text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" style={iconStyle}>
+            </svg>
+          </span>
+          <input
+            type="text"
+            placeholder="Search..."
+            className="flex-grow px-2 py-1 border-none bg-transparent text-white"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button style={goButtonStyle} onClick={handleSearch}>
+            Go
+          </button>
         </div>
+
+        <button style={{ ...trendingButtonStyle, ...textBelowSearchBarStyle, textAboveSearchBarStyle }}>
+          Trending: <span style={{ marginLeft: '8px' }}>flowers, love, forest, river</span>
+        </button>
+
+        <div style={searchResultsContainerStyle}>
+              {loading && (
+                <div className="flex items-center justify-center" style={{ minHeight: '100px' }}>
+                  <RingLoader color={'#3498db'} loading={loading} size={60} />
+                </div>
+              )}
+          <div style={gridContainerStyle} >
+            {searchResults.map((result) => (
+              <div
+                key={result.id}
+                className="max-w-sm rounded-lg shadow-lg "
+                style={cardStyle}
+                onClick={() => handleCardClick(result)}
+              >
+                <img src={result.webformatURL} alt={result.tags} style={imageStyle} />
+                <div style={contentStyle}>
+                  <p style={tagStyle}>{result.tags}</p>
+                </div>
+                {result.tags.split(',').map((tag, index) => (
+                  <div key={index} style={tagCardStyle}>
+                    <div style={tagContentStyle}>
+                      <div style={tagItemStyle}>{tag.trim()}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        {expandedCard && (
+        <ExpandedCard result={expandedCard} onClose={handleCloseExpandedCard} />
+      )}
+
       </div>
+    </>
+  );
+};
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default Home;
